@@ -1,5 +1,4 @@
 //jshint esversion: 6
-
 const http = require('http');
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
@@ -61,6 +60,14 @@ let server = http.createServer( (req, res) => {
       });
 
       resourceMapping[`/${reqBodyQS.elementName}.html`] = `./public/${reqBodyQS.elementName}.html`;
+      fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
+        console.log(content);
+        let updatedIndex = content.replace("<li>new list</li>", `<li><a href="/${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
+<li>new list</li>`);
+        fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
+          if(err) throw err;
+        });
+      });
 
       res.setHeader('Content-Type', 'application/json');
       res.statusCode = 200;
