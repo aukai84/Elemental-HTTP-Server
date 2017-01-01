@@ -31,6 +31,7 @@ let server = http.createServer( (req, res) => {
 
     if(req.url === '/elements' && req.method === 'POST'){
       fs.readdir('./public', (err, content) => {
+        if(content.indexOf(newURL) > -1){
       let reqBodyQS = qs.parse(reqBody);
     //create files now
       let createdHTML = `<!DOCTYPE html>
@@ -53,8 +54,7 @@ let server = http.createServer( (req, res) => {
         console.log(`${reqBodyQS.elementName}.html was created`);
       });
       fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
-        let updatedIndex = content.replace(`<p id="new-list"></p>`, `<li><a href="${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
-<p id="new-list"></p>`);
+        let updatedIndex = content.replace(`<p id="new-list"></p>`, `<li><a href="${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>\n<p id="new-list"></p>`);
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
           if(err) throw err;
         });
@@ -64,6 +64,7 @@ let server = http.createServer( (req, res) => {
       res.statusCode = 200;
       res.write(`{"success" : true}`);
       res.end();
+    }
     });
     }
 
@@ -111,10 +112,7 @@ let server = http.createServer( (req, res) => {
           fs.unlinkSync(`./public/${newURL}`);
           fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
             let fileName = newURL.slice(0, newURL.length - 5);
-            console.log(fileName);
             let newerFileName = fileName[0].toUpperCase() + fileName.substr(1);
-            console.log(newerFileName);
-            console.log(newURL, fileName);
             let updatedIndex = content.replace(`<li><a href="${newerFileName}.html">${newerFileName}</a></li>
 <p id="new-list"></p>`, '');
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
