@@ -4,15 +4,6 @@ const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 const qs = require('querystring');
 
-let resourceMapping = {
-  '/': './public/index.html',
-  '/hydrogen.html': './public/hydrogen.html',
-  '/helium.html': './public/helium.html',
-  '/index.html': './public/index.html',
-  '/404.html': './public/404.html',
-  '/css/styles.css': './public/css/styles.css',
-};
-
 function serverErrorHandler(res) {
   res.statusCode = 404;
   res.setHeader("content-Type", 'text/html');
@@ -29,6 +20,7 @@ function sendContent(res, content) {
 
 let server = http.createServer( (req, res) => {
 
+  let newURL = req.url.slice(1);
   let reqBody = '';
   req.setEncoding('utf8');
   req.on('data', (chunk) => {
@@ -57,13 +49,12 @@ let server = http.createServer( (req, res) => {
 </html>`;
       fs.writeFile(`./public/${reqBodyQS.elementName}.html`, createdHTML, (err) => {
         if(err) throw err;
+        console.log(`${reqBodyQS.elementName}.html was created`);
       });
 
-      resourceMapping[`/${reqBodyQS.elementName}.html`] = `./public/${reqBodyQS.elementName}.html`;
       fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
-        console.log(content);
-        let updatedIndex = content.replace("<li>new list</li>", `<li><a href="/${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
-<li>new list</li>`);
+        let updatedIndex = content.replace(`<p id="new-list"></p>`, `<li><a href="/${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
+<p id="new-list"></p>`);
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
           if(err) throw err;
         });
@@ -89,14 +80,28 @@ let server = http.createServer( (req, res) => {
     }
 
     if(req.method === 'GET'){
-
-      fs.readFile(resourceMapping[req.url] || '', (err, content) => {
-        if(err){
-          serverErrorHandler(res);
-          return;
+      if(req.url === '/css/styles.css'){
+        fs.readFile('./public/css/styles.css' || '', (err, content) => {
+          if(err){
+              serverErrorHandler(res);
+              return;
+            }
+              sendContent(res, content);
+        });
+      }
+      fs.readdir('./public', (err, content) => {
+        console.log(content);
+        if(content.indexOf(newURL) > -1){
+          fs.readFile(`./public/${newURL}` || '', (err, content) => {
+            if(err){
+              serverErrorHandler(res);
+              return;
+            }
+              sendContent(res, content);
+          });
         }
-          sendContent(res, content);
       });
+
     }
   });
 
