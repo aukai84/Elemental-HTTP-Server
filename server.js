@@ -60,8 +60,10 @@ let server = http.createServer( (req, res) => {
 </html>`;
       fs.writeFile(`./public/${reqBodyQS.elementName}.html`, createdHTML, (err) => {
         if(err) throw err;
-        console.log('created file');
+        console.log(`created ${reqBodyQS.elementName}.html`);
       });
+      resourceMapping[`/${reqBodyQS.elementName}.html`] = `./public/${reqBodyQS.elementName}.html`;
+      console.log(resourceMapping);
     }
 
     fs.readFile(resourceMapping[req.url] || '', (err, content) => {
