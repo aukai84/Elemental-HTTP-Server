@@ -21,10 +21,10 @@ function sendContent(res, content) {
 let server = http.createServer( (req, res) => {
 
   let newURL = req.url.slice(1);
-  let reqBody = '';
+  let reqBody;
   req.setEncoding('utf8');
   req.on('data', (chunk) => {
-    reqBody += chunk;
+    reqBody = chunk;
   });
 
   req.on('end', () => {
@@ -109,15 +109,20 @@ let server = http.createServer( (req, res) => {
         if(content.indexOf(newURL) > -1){
           fs.unlinkSync(`./public/${newURL}`);
           fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
-            let fileName = newURL.slice(0, newURL.length - 6);
-            console.log(fileName);
-            let updatedIndex = content.replace(`<li><a href="${newURL}">${fileName}</a></li>
-<p id="new-list"></p>`);
+            let fileName = newURL.slice(0, newURL.length - 5);
+            let newerFileName = fileName[0].toUpperCase() + fileName.substr(1);
+            console.log(newerFileName);
+            console.log(newURL, fileName);
+            let updatedIndex = content.replace(`<li><a href="${newerFileName}.html">${newerFileName}</a></li>`, '');
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
           if(err) throw err;
         });
       });
         }
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 200;
+      res.write(`{"success" : true}`);
+      res.end();
       });
     }
   });
