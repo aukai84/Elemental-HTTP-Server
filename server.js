@@ -21,15 +21,16 @@ function sendContent(res, content) {
 let server = http.createServer( (req, res) => {
 
   let newURL = req.url.slice(1);
-  let reqBody;
+  let reqBody = '';
   req.setEncoding('utf8');
   req.on('data', (chunk) => {
-    reqBody = chunk;
+    reqBody += chunk;
   });
 
   req.on('end', () => {
 
     if(req.url === '/elements' && req.method === 'POST'){
+      fs.readdir('./public', (err, content) => {
       let reqBodyQS = qs.parse(reqBody);
     //create files now
       let createdHTML = `<!DOCTYPE html>
@@ -51,7 +52,6 @@ let server = http.createServer( (req, res) => {
         if(err) throw err;
         console.log(`${reqBodyQS.elementName}.html was created`);
       });
-
       fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
         let updatedIndex = content.replace(`<p id="new-list"></p>`, `<li><a href="${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
 <p id="new-list"></p>`);
@@ -64,6 +64,7 @@ let server = http.createServer( (req, res) => {
       res.statusCode = 200;
       res.write(`{"success" : true}`);
       res.end();
+    });
     }
 
     if(req.method === 'PUT'){
@@ -110,10 +111,12 @@ let server = http.createServer( (req, res) => {
           fs.unlinkSync(`./public/${newURL}`);
           fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
             let fileName = newURL.slice(0, newURL.length - 5);
+            console.log(fileName);
             let newerFileName = fileName[0].toUpperCase() + fileName.substr(1);
             console.log(newerFileName);
             console.log(newURL, fileName);
-            let updatedIndex = content.replace(`<li><a href="${newerFileName}.html">${newerFileName}</a></li>`, '');
+            let updatedIndex = content.replace(`<li><a href="${newerFileName}.html">${newerFileName}</a></li>
+<p id="new-list"></p>`, '');
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
           if(err) throw err;
         });
