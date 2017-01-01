@@ -47,7 +47,7 @@ let server = http.createServer( (req, res) => {
   <p><a href="index.html">back</a></p>
 </body>
 </html>`;
-      fs.writeFile(`./public/${reqBodyQS.elementName}.html`, createdHTML, (err) => {
+      fs.writeFile(`./public/${reqBodyQS.elementName.toLowerCase()}.html`, createdHTML, (err) => {
         if(err) throw err;
         console.log(`${reqBodyQS.elementName}.html was created`);
       });
@@ -102,6 +102,23 @@ let server = http.createServer( (req, res) => {
         }
       });
 
+    }
+
+    if(req.method === 'DELETE'){
+      fs.readdir('./public', (err, content) => {
+        if(content.indexOf(newURL) > -1){
+          fs.unlinkSync(`./public/${newURL}`);
+          fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
+            let fileName = newURL.slice(0, newURL.length - 6);
+            console.log(fileName);
+            let updatedIndex = content.replace(`<li><a href="${newURL}">${fileName}</a></li>
+<p id="new-list"></p>`);
+        fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
+          if(err) throw err;
+        });
+      });
+        }
+      });
     }
   });
 
