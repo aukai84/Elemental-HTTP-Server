@@ -12,7 +12,6 @@ let resourceMapping = {
   '/index.html': './public/index.html',
   '/404.html': './public/404.html',
   '/css/styles.css': './public/css/styles.css',
-  '/elements': '??'
 };
 
 function serverErrorHandler(res) {
@@ -38,15 +37,32 @@ let server = http.createServer( (req, res) => {
   });
 
   req.on('end', () => {
-    let reqBodyQS = qs.parse(reqBody);
+
+    if(req.url === '/elements' && req.method === 'POST'){
+      let reqBodyQS = qs.parse(reqBody);
     console.log(reqBody);
     console.log(reqBodyQS);
     //create files now
-
-    fs.writeFile(`./public/${reqBodyQS.elementName}.html`, reqBodyQS.elementName, (err) => {
-      if(err) throw err;
-      console.log('created file');
-    });
+    let createdHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Elements - Helium</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>${reqBodyQS.elementName}</h1>
+  <h2>${reqBodyQS.elementSymbol}</h2>
+  <h3>Atomic number ${reqBodyQS.elementAtomicNumber}</h3>
+  <p>${reqBodyQS.elementDescription}</p>
+  <p><a href="/">back</a></p>
+</body>
+</html>`;
+      fs.writeFile(`./public/${reqBodyQS.elementName}.html`, createdHTML, (err) => {
+        if(err) throw err;
+        console.log('created file');
+      });
+    }
 
     fs.readFile(resourceMapping[req.url] || '', (err, content) => {
       if(err){
