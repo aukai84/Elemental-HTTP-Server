@@ -44,7 +44,7 @@ let server = http.createServer( (req, res) => {
   <h2>${reqBodyQS.elementSymbol}</h2>
   <h3>Atomic number ${reqBodyQS.elementAtomicNumber}</h3>
   <p>${reqBodyQS.elementDescription}</p>
-  <p><a href="/">back</a></p>
+  <p><a href="index.html">back</a></p>
 </body>
 </html>`;
       fs.writeFile(`./public/${reqBodyQS.elementName}.html`, createdHTML, (err) => {
@@ -53,7 +53,7 @@ let server = http.createServer( (req, res) => {
       });
 
       fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
-        let updatedIndex = content.replace(`<p id="new-list"></p>`, `<li><a href="/${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
+        let updatedIndex = content.replace(`<p id="new-list"></p>`, `<li><a href="${reqBodyQS.elementName}.html">${reqBodyQS.elementName}</a></li>
 <p id="new-list"></p>`);
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
           if(err) throw err;
