@@ -40,10 +40,8 @@ let server = http.createServer( (req, res) => {
 
     if(req.url === '/elements' && req.method === 'POST'){
       let reqBodyQS = qs.parse(reqBody);
-    console.log(reqBody);
-    console.log(reqBodyQS);
     //create files now
-    let createdHTML = `<!DOCTYPE html>
+      let createdHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -60,19 +58,39 @@ let server = http.createServer( (req, res) => {
 </html>`;
       fs.writeFile(`./public/${reqBodyQS.elementName}.html`, createdHTML, (err) => {
         if(err) throw err;
-        console.log(`created ${reqBodyQS.elementName}.html`);
       });
+
       resourceMapping[`/${reqBodyQS.elementName}.html`] = `./public/${reqBodyQS.elementName}.html`;
-      console.log(resourceMapping);
+
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 200;
+      res.write(`{"success" : true}`);
+      res.end();
     }
 
-    fs.readFile(resourceMapping[req.url] || '', (err, content) => {
-      if(err){
-        serverErrorHandler(res);
-        return;
-      }
-        sendContent(res, content);
-    });
+    if(req.method === 'PUT'){
+      fs.readFile(resourceMapping[req.url] || '', (err, content) => {
+        if(err){
+          res.statusCode = 500;
+          res.setHeader("content-Type", 'application/json');
+          res.write(`{"error : resource ${req.url} does not exist"}`);
+          res.end();
+          return;
+        }
+          sendContent(res, content);
+      });
+    }
+
+    if(req.method === 'GET'){
+
+      fs.readFile(resourceMapping[req.url] || '', (err, content) => {
+        if(err){
+          serverErrorHandler(res);
+          return;
+        }
+          sendContent(res, content);
+      });
+    }
   });
 
 });
