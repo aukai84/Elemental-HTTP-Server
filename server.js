@@ -3,6 +3,7 @@
 const http = require('http');
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
+const qs = require('querystring');
 
 let resourceMapping = {
   '/': './public/index.html',
@@ -35,10 +36,18 @@ let server = http.createServer( (req, res) => {
   req.on('data', (chunk) => {
     reqBody += chunk;
   });
-  console.log(reqBody);
-  req.on('end', () => {
 
+  req.on('end', () => {
+    let reqBodyQS = qs.parse(reqBody);
     console.log(reqBody);
+    console.log(reqBodyQS);
+    //create files now
+
+    fs.writeFile(`./public/${reqBodyQS.elementName}.html`, reqBodyQS.elementName, (err) => {
+      if(err) throw err;
+      console.log('created file');
+    });
+
     fs.readFile(resourceMapping[req.url] || '', (err, content) => {
       if(err){
         serverErrorHandler(res);
