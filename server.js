@@ -30,8 +30,7 @@ let server = http.createServer( (req, res) => {
   req.on('end', () => {
 
     if(req.url === '/elements' && req.method === 'POST'){
-      fs.readdir('./public', (err, content) => {
-        if(content.indexOf(newURL) > -1){
+
       let reqBodyQS = qs.parse(reqBody);
     //create files now
       let createdHTML = `<!DOCTYPE html>
@@ -64,22 +63,22 @@ let server = http.createServer( (req, res) => {
       res.statusCode = 200;
       res.write(`{"success" : true}`);
       res.end();
-    }
-    });
+
+
     }
 
-    if(req.method === 'PUT'){
-      fs.readFile(resourceMapping[req.url] || '', (err, content) => {
-        if(err){
-          res.statusCode = 500;
-          res.setHeader("content-Type", 'application/json');
-          res.write(`{"error : resource ${req.url} does not exist"}`);
-          res.end();
-          return;
-        }
-          sendContent(res, content);
-      });
-    }
+    // if(req.method === 'PUT'){
+    //   fs.readFile(resourceMapping[req.url] || '', (err, content) => {
+    //     if(err){
+    //       res.statusCode = 500;
+    //       res.setHeader("content-Type", 'application/json');
+    //       res.write(`{"error : resource ${req.url} does not exist"}`);
+    //       res.end();
+    //       return;
+    //     }
+    //       sendContent(res, content);
+    //   });
+    // }
 
     if(req.method === 'GET'){
       if(req.url === '/css/styles.css'){
@@ -113,8 +112,7 @@ let server = http.createServer( (req, res) => {
           fs.readFile('./public/index.html',{encoding: 'utf8'}, (err, content) => {
             let fileName = newURL.slice(0, newURL.length - 5);
             let newerFileName = fileName[0].toUpperCase() + fileName.substr(1);
-            let updatedIndex = content.replace(`<li><a href="${newerFileName}.html">${newerFileName}</a></li>
-<p id="new-list"></p>`, '');
+            let updatedIndex = content.replace(`<li><a href="${newerFileName}.html">${newerFileName}</a></li>`, '');
         fs.writeFile(`./public/index.html`, updatedIndex, (err) => {
           if(err) throw err;
         });
